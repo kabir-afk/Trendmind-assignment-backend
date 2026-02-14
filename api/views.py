@@ -5,13 +5,19 @@ from google import genai
 from django.conf import settings
 
 # Create your views here.
-
-
 class GeneratePost(APIView):
-    # def get(self,req):
-    #     return Response('hellow',status=status.HTTP_200_OK)
     def post(self,req):
-        tone, targetAudience,topic,length = req.data.values()
+        tone = req.data.get("tone")
+        targetAudience = req.data.get("targetAudience")
+        topic = req.data.get("topic")
+        length = req.data.get("length")
+        
+        if not settings.GEMINI_API_KEY:
+            return Response(
+                {"error": "GEMINI_API_KEY not configured"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
         client = genai.Client(api_key=settings.GEMINI_API_KEY)
         prompt = f"""You are an expert LinkedIn content strategist.
                     Write a LinkedIn post using the following parameters:
@@ -28,5 +34,5 @@ class GeneratePost(APIView):
                         - End with a thought-provoking question."""
         response = client.models.generate_content(
         model="gemini-3-flash-preview", contents=prompt)
-        return Response(f'post:{response.text}',status=status.HTTP_201_CREATED)
+        return Response(response.text,status=status.HTTP_201_CREATED)
         
