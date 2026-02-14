@@ -40,6 +40,18 @@ class GeneratePost(APIView):
                         - Provide actionable insight.
                         - Avoid generic motivational fluff.
                         - End with a thought-provoking question."""
-        response = client.models.generate_content(
-        model="gemini-3-flash-preview", contents=prompt)
-        return Response({'post':response.text},status=status.HTTP_200_OK)
+        
+        try:
+            response = client.models.generate_content(
+                model="gemini-3-flash-preview",
+                contents=prompt
+            )
+            return Response(
+                {"post": response.text},
+                status=status.HTTP_200_OK
+            )
+        except Exception:
+            return Response(
+                {"error": "Failed to generate post"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
